@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>豆瓣电影 Top250</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('serve_css') }}">
+</head>
+
+<body>
+  <h1 style="color: #007BFF; font-family: 'Helvetica Neue', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">豆瓣电影 Top250</h1>
+
+  <div class="search">
+    <form action="{{ url_for('search') }}" method="get">
+      <input type="text" name="query" placeholder="搜索电影标题" style="width: 300px; padding: 10px; font-size: 16px; border: 1px solid #007BFF; border-radius: 5px;">
+      <input type="submit" value="搜索标题" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    </form>
+    <form action="{{ url_for('search') }}" method="get">
+      <input type="text" name="director_query" placeholder="搜索电影导演" style="width: 300px; padding: 10px; font-size: 16px; border: 1px solid #007BFF; border-radius: 5px;">
+      <input type="submit" value="搜索导演" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    </form>
+    <form action="{{ url_for('paginate', page=1) }}" method="get">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+        {% for type_ in MOVIE_TYPES %}
+          <label style="margin: 10px; font-size: 16px;">
+            <input type="checkbox" name="movie_type" value="{{ type_ }}" {% if type_ in selected_types %}checked{% endif %} style="cursor: pointer;">
+            {{ type_ }}
+          </label>
+        {% endfor %}
+      </div>
+      <input type="submit" value="筛选类型" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    </form>
+  </div>
+
+  <div>
+    <form action="{{ url_for('paginate', page=1) }}" method="get">
+      <select name="sort_option" style="width: 200px; padding: 10px; font-size: 16px; border: 1px solid #007BFF; border-radius: 5px;">
+        {% for option, label in SORT_OPTIONS.items() %}
+          <option value="{{ option }}" {% if sort_option == option %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label style="margin-left: 20px; font-size: 16px;"><input type="radio" name="sort_order" value="asc" {% if sort_order == 'asc' %}checked{% endif %} style="cursor: pointer;">升序</label>
+      <label style="margin-left: 20px; font-size: 16px;"><input type="radio" name="sort_order" value="desc" {% if sort_order == 'desc' %}checked{% endif %} style="cursor: pointer;">降序</label>
+      <input type="submit" value="排序" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    </form>
+  </div>
+
+  <table border="1" style="width: 80%; margin: 0 auto; border-collapse: collapse; background-color: white; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+    <tr>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">序号</th> 
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影标题</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影评分</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影评价人数</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影导演</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影类型</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影上映年份</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影简述</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影超链接</th>
+      <th style="background-color: #007BFF; color: white; padding: 15px; font-size: 18px;">电影图片</th>
+    </tr>
+    {% for movie in movies %}
+    <tr>
+      <td>{{ movie.index }}</td>
+      <td>{{ movie['电影标题'] }}</td>
+      <td>{{ movie['电影评分'] }}</td>
+      <td>{{ movie['电影评价人数'] }}</td>
+      <td>{{ movie['电影导演'] }}</td>
+      <td>{{ movie['电影类型'] }}</td>
+      <td>{{ movie['电影上映年份'] }}</td>
+      <td>{{ movie['电影简述'] }}</td>
+      <td><a href="{{ movie['电影超链接'] }}">链接</a></td>
+      <td><img width="100" alt="{{ movie['电影标题'] }}" src="{{ movie['电影图片超链接'] }}" class=""></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="pagination" style="margin-top: 20px; padding: 20px; background-color: #F8F9FA; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+    {% if page > 1 %}
+    <a href="{{ url_for('paginate', page=page - 1) }}" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">上一页</a>
+    {% endif %}
+    {% if page < total_pages %}
+    <a href="{{ url_for('paginate', page=page + 1) }}" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">下一页</a>
+    {% endif %}
+  </div>
+  <div class="pagination" style="margin-top: 20px; padding: 20px; background-color: #F8F9FA; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+    {% for i in range(1, total_pages + 1) %}
+      {% if i == page %}
+        <strong style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px;">{{ i }}</strong>
+      {% else %}
+        <a href="{{ url_for('paginate', page=i) }}" style="padding: 10px 20px; font-size: 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">{{ i }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div style="text-align: center; margin-top: 20px; font-size: 14px; color: #6C757D;"> 请勿搬运，有问题联系何淇浩团队，QQ：3082441080</div>
+</body>
+
+</html>
